@@ -28,6 +28,9 @@ RUN poetry add gunicorn
 # Eliminar cualquier entorno virtual existente
 RUN rm -rf /app/.venv
 
+# Crear el directorio de logs sino no puede escribir en archivo
+RUN mkdir -p /app/logs
+
 # Copiar el resto del código fuente al contenedor
 COPY . /app
 
