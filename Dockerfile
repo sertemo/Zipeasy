@@ -38,5 +38,5 @@ COPY . /app
 EXPOSE 4321
 
 # Comando para ejecutar el servidor en modo producción
-CMD ["gunicorn", "--bind", "0.0.0.0:4321", "src.zipeasy.main:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:4321", "src.zipeasy.main:app", "--workers", "4", "--timeout", "120"]
 
