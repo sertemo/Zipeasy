@@ -6,22 +6,15 @@
 ![GitHub](https://img.shields.io/github/license/sertemo/Zipeasy)
 
 ## Descripción
-
-## Empezando
-
-### Pre-requisitos
-
-### Instalación
+Pequeña y ligera aplicación web para comprimir archivos en formato **zip**.
 
 ## Uso
+Carga los archivos que deseas comprimir en el área de selección y pulsa sobre el botón Comprimir
+![alt text](assets/img/zipeasy.JPG)
 
-## Desarrollo
-
-### Código de Conducta
-
-### Proceso de Pull Request
 
 ## SemVer
+0.1.0 : Versión inicial
 
 ## Tests
 ![Pytest](https://img.shields.io/badge/testing-pytest-blue.svg)
@@ -32,8 +25,10 @@
 ## Tecnologías
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Poetry](https://img.shields.io/badge/Poetry-60A5FA?style=for-the-badge&logo=python&logoColor=white)
-
-## Contribuyentes
+![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
+![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-%23F7DF1E.svg?style=for-the-badge&logo=javascript&logoColor=black)
 
 ## Licencia
 Copyright 2024 Sergio Tejedor Moreno

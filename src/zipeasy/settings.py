@@ -18,3 +18,7 @@ from pathlib import Path
 FOLDER_LOGS = Path("logs")
 LOG_FILE = "zipeasy.log"
 LOG_PATH = FOLDER_LOGS / LOG_FILE
+
+# App
+COMPRESS_FILENAME: str = "zipeasy"
+ERASE_DELAY: int = 5

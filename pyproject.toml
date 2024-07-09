@@ -10,6 +10,8 @@ packages = [{include = "zipeasy", from = "src"}]
 python = "^3.10"
 toml = "^0.10.2"
 python-dotenv = "^1.0.1"
+flask = "^3.0.3"
+gunicorn = "^22.0.0"
 
 
 [tool.poetry.group.dev.dependencies]

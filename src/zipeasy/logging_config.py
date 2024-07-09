@@ -15,7 +15,7 @@
 import logging
 from logging.config import dictConfig
 
-from zipeasy.settings import LOG_PATH
+from .settings import LOG_PATH
 
 LOGGING_CONFIG = {
     "version": 1,

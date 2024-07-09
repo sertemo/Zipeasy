@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zipeasy | Easy File Compression | By Sergio Tejedor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Zipeasy</h1>
+        <p class="subtitle">Compresión de archivos fácil</p>
+        <div id="drop-area">
+            <form id="upload-form" enctype="multipart/form-data">
+                <p style="color: #ddd;">Arrastra tus archivos o <label for="fileElem" id="fileLabel">súbelos</label>.</p>
+                <input type="file" id="fileElem" multiple onchange="handleFiles(this.files)">
+                <ul id="file-list"></ul>
+                <button type="button" id="compressBtn">Comprimir</button>
+                <button type="button" id="clearBtn" onclick="clearFiles()" style="display: none;" title="Remove all files">Borrar todo</button>
+                <p id="error-message" class="error-message" style="display: none;">Debes añadir algún archivo</p>
+            </form>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>
+
+
+
+

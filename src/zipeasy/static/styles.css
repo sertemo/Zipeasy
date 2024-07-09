@@ -1,0 +1,105 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #1a1a1a;
+}
+
+.container {
+    text-align: center;
+    width: 80%;
+    padding: 10px;
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #febf1a;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.subtitle {
+    font-size: 1.25rem;
+    color: #a7a6a6;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+#drop-area {
+    border: 2px dashed #ccc;
+    padding: 30px;
+    width: 80%;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    background: #3d3d3d;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+#drop-area.highlight {
+    border-color: #febf1a;
+}
+
+#fileElem {
+    display: none;
+}
+
+#fileLabel {
+    cursor: pointer;
+    color: #febf1a;
+    text-decoration: underline;
+}
+
+ul#file-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 1rem 0;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+ul#file-list li {
+    padding: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #ddd;
+}
+
+ul#file-list li:not(:last-child) {
+    border-bottom: 1px solid #ddd;
+}
+
+button {
+    background: #febf1a;
+    color: #3a3a3a;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    position: relative;
+}
+
+button:hover {
+    background: #ecc359;
+}
+
+.error-message {
+    color: red;
+    margin-top: 1rem;
+}
+
+
+
+
+
