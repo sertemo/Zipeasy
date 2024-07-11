@@ -4,6 +4,7 @@
 ![Tests](https://github.com/sertemo/Zipeasy/actions/workflows/tests.yml/badge.svg)
 ![Dependabot](https://img.shields.io/badge/dependabot-enabled-blue.svg?logo=dependabot)
 ![GitHub](https://img.shields.io/github/license/sertemo/Zipeasy)
+![Docker](https://img.shields.io/docker/image-size/sertemo/Zipeasy?color=blue&logo=docker)
 
 ## Descripción
 Pequeña y ligera aplicación web para comprimir archivos en formato **zip**.
@@ -92,7 +93,7 @@ certbot  docker-compose.yml  dockerlog.log  nginx.conf  update_docker.sh
 
 El archivo update_docker.sh es opcional y se encarga de hacer pull periódicamente y actualizar los contenedores.
 
-### Crar la Network con Docker Compose
+### Crear la Network con Docker Compose
 La idea es crear una **network** con docker compose compuesta por 3 contenedores:
 - **zipeasy**: La aplicación web que corre en Gunicorn y cuya imagen se obtiene de DockerHub.
 - **Certbot**: Emite y actualiza periódicamente (cada 12 horas) los certificados SSL.
