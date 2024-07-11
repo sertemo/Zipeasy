@@ -4,7 +4,7 @@
 ![Tests](https://github.com/sertemo/Zipeasy/actions/workflows/tests.yml/badge.svg)
 ![Dependabot](https://img.shields.io/badge/dependabot-enabled-blue.svg?logo=dependabot)
 ![GitHub](https://img.shields.io/github/license/sertemo/Zipeasy)
-![Docker](https://img.shields.io/docker/image-size/sertemo/Zipeasy?color=blue&logo=docker)
+![Docker](https://img.shields.io/docker/image-size/sertemo/zipeasy?color=blue&logo=docker)
 
 ## Descripción
 Pequeña y ligera aplicación web para comprimir archivos en formato **zip**.
