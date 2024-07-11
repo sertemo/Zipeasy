@@ -17,8 +17,10 @@ Carga los archivos que deseas comprimir en el área de selección y pulsa sobre 
 
 ![alt text](assets/img/zipeasy.JPG)
 
-## Proceso
-Una vez terminado el código del proyecto, se crea, como siempre el workflow con Github Actions para que crear la imagen y subirla al DockerHub.
+## Proceso de Configuración
+
+### Workflow de CI/CD en Github Actions
+Primero, se crea el workflow con GitHub Actions para construir la imagen y subirla a DockerHub.
 
 `.github/workflows/docker.yml`
 ```yaml
@@ -61,13 +63,13 @@ jobs:
           tags: sertemo/zipeasy:latest
 ```
 
-Posteriormente, desde mi servidor, se usará la imagen del DockerHub para montar la network con *docker compose*.
 
-### Configuración del proyecto en el servidor. Docker Compose
+### Configuración del proyecto en el servidor con Docker Compose
+Posteriormente, desde mi servidor, se usará la imagen del DockerHub para montar la network con *docker compose*.
 Para poder usar el protocolo https, hace falta un certificado. Para ello puede usarse [Certbot](https://github.com/certbot/certbot) junto con [nginx](https://github.com/nginx)
 
 #### Instalaciones
-Hay que tener instalados `nginx` y `certbot`
+Hay que tener instalados `nginx` y `certbot` en el servidor
 
 ```sh
 sudo apt update
@@ -75,25 +77,26 @@ sudo apt install nginx
 sudo apt install certbot python3-certbot-nginx
 ```
 
-#### Archivo y carpetas
+#### Estructura de archivo y carpetas
 En el servidor creamos la carpeta del proyecto `Zipeasy`
 
 ```sh
 mkdir Zipeasy
 ```
 
-Dentro de ella deberemos tener los siguientes archivos
+Dentro de ella deberemos tener los siguientes archivos y carpetas
 
 ```sh
 certbot  docker-compose.yml  dockerlog.log  nginx.conf  update_docker.sh
 ```
 
-El archivo `update_docker.sh` es opcional siendo el que se encarga de hacer pull periódicamente y actualizar los contenedores.
+El archivo update_docker.sh es opcional y se encarga de hacer pull periódicamente y actualizar los contenedores.
 
+### Crar la Network con Docker Compose
 La idea es crear una **network** con docker compose compuesta por 3 contenedores:
-- La aplicación web **zipeasy** que corre en gunicorn y cuya imagen se obtiene de mi Dockerhub
-- **Certbot**, que emite y actualiza periódicamente (cada 12 horas) los certificados. Soporta nginx como web server. El primer certificado hay que hacerlo manualmente.
-- nginx, se usa como proxy inverso manejando las solicitudes **http** y **https** pasándoselas al servidor **gunicorn** que ejecuta la aplicación en **Flask**. Nginx envía las solicitudes al puerto 4321.
+- **zipeasy**: La aplicación web que corre en Gunicorn y cuya imagen se obtiene de DockerHub.
+- **Certbot**: Emite y actualiza periódicamente (cada 12 horas) los certificados SSL.
+- **nginx**:  Actúa como proxy inverso manejando las solicitudes HTTP y HTTPS y redirigiéndolas al servidor Gunicorn que ejecuta la aplicación en Flask.
 
 #### Obtener un certificado
 Para obtener un certificado usamos el comando:
@@ -107,12 +110,8 @@ Nos pedirá que añadamos en nuestro dominio un **TXT** con cierto valor. Para e
 Una vez hecho esto se crearán los certificados en la carpeta `certbot`.
 
 Adicionalmente he tenido que crear manualmente 2 archivos necesarios para el correcto funcionamiento de nginx:
-- options-ssl-nginx.conf
-- ssl-dhparams.pem
-
-El primero puede obtenerse de Github: https://github.com/certbot/certbot/blob/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf y debe guardarse en `~/Projects/Zipeasy/certbot/conf/`.
-
-El segundo se puede generar mediante el script:
+- options-ssl-nginx.conf: Puede obtenerse de [Github](https://github.com/certbot/certbot/blob/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf) y se guarda en `~/Projects/Zipeasy/certbot/conf/`.
+- ssl-dhparams.pem: Se puede generar mediante el comando:
 ```sh
 openssl dhparam -out ~/Projects/Zipeasy/certbot/conf/ssl-dhparams.pem 2048
 ```
@@ -120,12 +119,11 @@ openssl dhparam -out ~/Projects/Zipeasy/certbot/conf/ssl-dhparams.pem 2048
 #### Configuración de Nginx
 Configuramos Nginx mediante el archivo `nginx.conf`
 
-Vamos a configurarlo para que escuche en el puerto **8080** para solicitudes http y **60443** para las solicitudes https.
-Esto lo hacemos así porque el proveedor de mi router tiene utilizados por puertos **80** y **443** que corresponden con los protocolores anteriores y no me deja hacer un port forwarding con esos puertos. 
+Configura Nginx mediante el archivo nginx.conf para que escuche en el puerto 8080 para solicitudes HTTP y 60443 para solicitudes HTTPS 
 
 nginx también redireccionará las solicitudes http a https de los puertos indicados previamente.
 
-```
+```nginx
 events {}
 
 http {
@@ -175,6 +173,7 @@ services:
       - "4321"
     environment:
       - ENV=production
+    restart: unless-stopped
 
   nginx:
     image: nginx:latest
@@ -188,6 +187,7 @@ services:
       - ./certbot/www:/var/www/certbot
     depends_on:
       - web
+    restart: unless-stopped
 
   certbot:
     image: certbot/certbot
@@ -196,16 +196,17 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 12h & wait $${!}; certbot renew; done;'"
+    restart: unless-stopped
 ```
 
 Importante el uso de los volúmenes para vincular los archivos de configuración guardados en la carpeta del proyecto a los archivos dentro de los contenedores de certbot y nginx.
 
-#### Port Forwarding
+### Port Forwarding
 Realizamos desde la configuración del router un port forwarding de los puertos 8080 externo al 8080 interno en la ip privada del servidor.
 
 Realizamos otra redirección del puerto 60443 externo al 60443 interno en la ip privada del servidor.
 
-#### Ejecución de la App
+### Ejecución de la App
 una vez terminada la configuración, nos situamos en el directorio de trabajo y ejecutamos la network
 
 ```sh
@@ -217,6 +218,41 @@ Esto ejecutará el archivo `docker-compose.yml` y correrá los servicios.
 La aplicación debería estar disponible en la siguiente dirección:
 
 https://trymlmodels.com:60443
+
+### Automatización con update_docker.sh
+
+Adicionalmente se puede configurar el archivo `update_docker.sh` y ejecutarlo periódicamente mediante un cronjob para actualizar la network.
+
+```bash
+#!/bin/bash
+
+# Configuración
+COMPOSE_FILE="~/Projects/Zipeasy/docker-compose.yml"
+LOG_FILE="~/Projects/Zipeasy/dockerlog.log"
+
+# Función para añadir registros con fecha y hora a la consola y al archivo de log
+log() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a $LOG_FILE
+}
+
+# Hacer pull de la última imagen
+log "Haciendo pull de la última imagen..."
+docker-compose -f $COMPOSE_FILE pull | tee -a $LOG_FILE 2>&1
+
+# Detener los contenedores existentes
+log "Deteniendo contenedores existentes..."
+docker-compose -f $COMPOSE_FILE down | tee -a $LOG_FILE 2>&1
+
+# Comprobar si hay cambios en la imagen y recrear los contenedores
+log "Verificando si hay actualizaciones en la imagen y recreando contenedores..."
+docker-compose -f $COMPOSE_FILE up -d | tee -a $LOG_FILE 2>&1
+
+# Limpieza de imágenes no utilizadas independientemente de la actualización
+log "Limpiando imágenes antiguas..."
+docker image prune -f --filter "until=24h" | tee -a $LOG_FILE 2>&1
+log "Limpieza de imágenes antiguas completada."
+
+```
 
 ## SemVer
 0.1.0 : Versión inicial
