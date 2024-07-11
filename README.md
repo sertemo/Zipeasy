@@ -8,10 +8,215 @@
 ## Descripción
 Pequeña y ligera aplicación web para comprimir archivos en formato **zip**.
 
+En este proyecto he automatizado la obtención de un certificado para poder usar el protocolo *https*
+
 ## Uso
-Carga los archivos que deseas comprimir en el área de selección y pulsa sobre el botón Comprimir
+Visita la url: https://trymlmodels.com:60443
+
+Carga los archivos que deseas comprimir en el área de selección y pulsa sobre el botón `Comprimir`
+
 ![alt text](assets/img/zipeasy.JPG)
 
+## Proceso
+Una vez terminado el código del proyecto, se crea, como siempre el workflow con Github Actions para que crear la imagen y subirla al DockerHub.
+
+`.github/workflows/docker.yml`
+```yaml
+name: ci to Docker Hub
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'src/**'
+      - 'Dockerfile'
+      - 'pyproject.toml'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}  # Meterlo en los secrets del repo
+          password: ${{ secrets.DOCKER_PASSWORD }}  # Meterlo en los secrets del repo
+      -
+        name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: sertemo/zipeasy:latest
+```
+
+Posteriormente, desde mi servidor, se usará la imagen del DockerHub para montar la network con *docker compose*.
+
+### Configuración del proyecto en el servidor. Docker Compose
+Para poder usar el protocolo https, hace falta un certificado. Para ello puede usarse [Certbot](https://github.com/certbot/certbot) junto con [nginx](https://github.com/nginx)
+
+#### Instalaciones
+Hay que tener instalados `nginx` y `certbot`
+
+```sh
+sudo apt update
+sudo apt install nginx
+sudo apt install certbot python3-certbot-nginx
+```
+
+#### Archivo y carpetas
+En el servidor creamos la carpeta del proyecto `Zipeasy`
+
+```sh
+mkdir Zipeasy
+```
+
+Dentro de ella deberemos tener los siguientes archivos
+
+```sh
+certbot  docker-compose.yml  dockerlog.log  nginx.conf  update_docker.sh
+```
+
+El archivo `update_docker.sh` es opcional siendo el que se encarga de hacer pull periódicamente y actualizar los contenedores.
+
+La idea es crear una **network** con docker compose compuesta por 3 contenedores:
+- La aplicación web **zipeasy** que corre en gunicorn y cuya imagen se obtiene de mi Dockerhub
+- **Certbot**, que emite y actualiza periódicamente (cada 12 horas) los certificados. Soporta nginx como web server. El primer certificado hay que hacerlo manualmente.
+- nginx, se usa como proxy inverso manejando las solicitudes **http** y **https** pasándoselas al servidor **gunicorn** que ejecuta la aplicación en **Flask**. Nginx envía las solicitudes al puerto 4321.
+
+#### Obtener un certificado
+Para obtener un certificado usamos el comando:
+
+```sh
+sudo certbot --nginx -d trymlmodels.com -d www.trymlmodels.com
+```
+
+Nos pedirá que añadamos en nuestro dominio un **TXT** con cierto valor. Para ello debemos ir a la página de Porkbun, en DNS y crear 2 TXT con los valores que nos proporcionan.
+
+Una vez hecho esto se crearán los certificados en la carpeta `certbot`.
+
+Adicionalmente he tenido que crear manualmente 2 archivos necesarios para el correcto funcionamiento de nginx:
+- options-ssl-nginx.conf
+- ssl-dhparams.pem
+
+El primero puede obtenerse de Github: https://github.com/certbot/certbot/blob/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf y debe guardarse en `~/Projects/Zipeasy/certbot/conf/`.
+
+El segundo se puede generar mediante el script:
+```sh
+openssl dhparam -out ~/Projects/Zipeasy/certbot/conf/ssl-dhparams.pem 2048
+```
+
+#### Configuración de Nginx
+Configuramos Nginx mediante el archivo `nginx.conf`
+
+Vamos a configurarlo para que escuche en el puerto **8080** para solicitudes http y **60443** para las solicitudes https.
+Esto lo hacemos así porque el proveedor de mi router tiene utilizados por puertos **80** y **443** que corresponden con los protocolores anteriores y no me deja hacer un port forwarding con esos puertos. 
+
+nginx también redireccionará las solicitudes http a https de los puertos indicados previamente.
+
+```
+events {}
+
+http {
+    server {
+        listen 8080;
+        server_name trymlmodels.com www.trymlmodels.com;
+
+        location / {
+            return 301 https://$host:60443$request_uri;
+        }
+
+        location ~ /.well-known/acme-challenge/ {
+            root /var/www/certbot;
+            allow all;
+        }
+    }
+
+    server {
+        listen 60443 ssl;
+        server_name trymlmodels.com www.trymlmodels.com;
+
+        ssl_certificate /etc/letsencrypt/live/trymlmodels.com/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/trymlmodels.com/privkey.pem;
+        include /etc/letsencrypt/options-ssl-nginx.conf;
+        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+        location / {
+            proxy_pass http://zipeasy_container:4321;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+}
+```
+
+#### Configuración de Docker compose
+Configuramos el archivop `docker-compose.yml` para crear una red con los 3 contenedores:
+
+```yaml
+services:
+  web:
+    image: sertemo/zipeasy:latest  # Usamos la imagen de mi DockerHub
+    container_name: zipeasy_container
+    expose:
+      - "4321"
+    environment:
+      - ENV=production
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8080:8080"
+      - "60443:60443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - web
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 12h & wait $${!}; certbot renew; done;'"
+```
+
+Importante el uso de los volúmenes para vincular los archivos de configuración guardados en la carpeta del proyecto a los archivos dentro de los contenedores de certbot y nginx.
+
+#### Port Forwarding
+Realizamos desde la configuración del router un port forwarding de los puertos 8080 externo al 8080 interno en la ip privada del servidor.
+
+Realizamos otra redirección del puerto 60443 externo al 60443 interno en la ip privada del servidor.
+
+#### Ejecución de la App
+una vez terminada la configuración, nos situamos en el directorio de trabajo y ejecutamos la network
+
+```sh
+docker-compose up -d
+```
+
+Esto ejecutará el archivo `docker-compose.yml` y correrá los servicios.
+
+La aplicación debería estar disponible en la siguiente dirección:
+
+https://trymlmodels.com:60443
 
 ## SemVer
 0.1.0 : Versión inicial
