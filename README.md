@@ -260,8 +260,8 @@ log "Limpieza de imágenes antiguas completada."
 ```
 
 ## SemVer
-0.1.0 : Versión inicial
-0.2.0 : Agregado límite de archivos en 10M. Visualización del límite de archivos subidos y nuevo mensaje de error cuando se excede el límite
+- 0.1.0 : Versión inicial
+- 0.2.0 : Agregado límite de archivos en 10M. Visualización del límite de archivos subidos y nuevo mensaje de error cuando se excede el límite
 
 ## Tests
 ![Pytest](https://img.shields.io/badge/testing-pytest-blue.svg)
