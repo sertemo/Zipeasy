@@ -124,6 +124,8 @@ Configura Nginx mediante el archivo nginx.conf para que escuche en el puerto 808
 
 nginx también redireccionará las solicitudes http a https de los puertos indicados previamente.
 
+Para limitar el tamaño de los archivos a un determinado valor, se agrega el argumento **client_max_body_size**
+
 ```nginx
 events {}
 
@@ -140,6 +142,7 @@ http {
             root /var/www/certbot;
             allow all;
         }
+        client_max_body_size 10M;
     }
 
     server {
@@ -158,6 +161,7 @@ http {
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
         }
+        client_max_body_size 10M;
     }
 }
 ```
