@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const removeAllButton = document.getElementById('clearBtn');
     const message = document.getElementById('error-message');
     const compressButton = document.getElementById('compressBtn');
+    const fileSizeIndicator = document.getElementById('file-size-indicator');
     let files = [];
+    const maxTotalSize = 10 * 1024 * 1024; // 10 MB
 
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropArea.addEventListener(eventName, preventDefaults, false);
@@ -47,6 +49,13 @@ document.addEventListener('DOMContentLoaded', function () {
     compressButton.addEventListener('click', function (event) {
         event.preventDefault();
         message.style.display = 'none';
+
+        let totalSize = files.reduce((acc, file) => acc + file.size, 0);
+        if (totalSize > maxTotalSize) {
+            message.textContent = 'Se ha superado el tamaño máximo permitido.';
+            message.style.display = 'block';
+            return;
+        }
 
         if (files.length === 0) {
             message.textContent = 'Añade archivos para comprimir.';
@@ -95,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateFileList() {
         fileList.innerHTML = '';
+        let totalSize = files.reduce((acc, file) => acc + file.size, 0);
         files.forEach((file, index) => {
             const li = document.createElement('li');
             li.textContent = file.name;
@@ -110,8 +120,11 @@ document.addEventListener('DOMContentLoaded', function () {
             fileList.appendChild(li);
         });
         removeAllButton.style.display = files.length > 1 ? 'inline-block' : 'none';
+        fileSizeIndicator.textContent = `${(totalSize / (1024 * 1024)).toFixed(1)}M / 10M`;
+        fileSizeIndicator.style.color = totalSize > maxTotalSize ? 'red' : '#ddd';
     }
 });
+
 
 
 

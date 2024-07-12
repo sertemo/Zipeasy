@@ -1,5 +1,5 @@
 # Zipeasy
-### v0.1.0
+### v0.2.0
 
 ![Tests](https://github.com/sertemo/Zipeasy/actions/workflows/tests.yml/badge.svg)
 ![Dependabot](https://img.shields.io/badge/dependabot-enabled-blue.svg?logo=dependabot)
@@ -261,6 +261,7 @@ log "Limpieza de imágenes antiguas completada."
 
 ## SemVer
 0.1.0 : Versión inicial
+0.2.0 : Agregado límite de archivos en 10M. Visualización del límite de archivos subidos y nuevo mensaje de error cuando se excede el límite
 
 ## Tests
 ![Pytest](https://img.shields.io/badge/testing-pytest-blue.svg)

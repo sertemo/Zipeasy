@@ -94,10 +94,21 @@ button:hover {
     background: #ecc359;
 }
 
-.error-message {
+#error-message {
     color: red;
     margin-top: 1rem;
 }
+
+#error-message.hidden {
+    display: none;
+}
+
+#file-size-indicator {
+    color: #ddd;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
 
 
 

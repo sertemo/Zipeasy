@@ -17,6 +17,7 @@
                 <p style="color: #ddd;">Arrastra tus archivos o <label for="fileElem" id="fileLabel">súbelos</label>.</p>
                 <input type="file" id="fileElem" multiple onchange="handleFiles(this.files)">
                 <ul id="file-list"></ul>
+                <div id="file-size-indicator">0M / 10M</div>
                 <button type="button" id="compressBtn">Comprimir</button>
                 <button type="button" id="clearBtn" onclick="clearFiles()" style="display: none;" title="Remove all files">Borrar todo</button>
                 <p id="error-message" class="error-message" style="display: none;">Debes añadir algún archivo</p>
@@ -26,7 +27,3 @@
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>
-
-
-
-
