@@ -12,7 +12,7 @@ Pequeña y ligera aplicación web para comprimir archivos en formato **zip**.
 En este proyecto he automatizado la obtención de un certificado para poder usar el protocolo *https*
 
 ## Uso
-Visita la url: https://trymlmodels.com:60443
+Visita la url: https://zipeasy.trymlmodels.com
 
 Carga los archivos que deseas comprimir en el área de selección y pulsa sobre el botón `Comprimir`
 
@@ -262,6 +262,9 @@ log "Limpieza de imágenes antiguas completada."
 ## SemVer
 - 0.1.0 : Versión inicial
 - 0.2.0 : Agregado límite de archivos en 10M. Visualización del límite de archivos subidos y nuevo mensaje de error cuando se excede el límite
+
+## Updates
+- 09/09/2024 : Se migra la aplicación de mi servidor casero (Beelink) a los servidores de GCP en un **Cloud Run**. Para ello se crea un nuevo subdominio llamado zipeasy.trymlmodels.com. Se agrega en el administrador de dominios personalizados, dentro de Cloud Run y se agrega posteriormente una **CNAME** en el proveedor de dominios. Ya no son necesarios los contenedores **nginx** y **certbot** puesto que se porkbun tiene certificados SSL gratuitos y GCP proporciona el subdominio.
 
 ## Tests
 ![Pytest](https://img.shields.io/badge/testing-pytest-blue.svg)
